@@ -3,7 +3,7 @@ pipeline {
     environment {
       // The following variable is required for a Semgrep Cloud Platform-connected scan:
       SEMGREP_APP_TOKEN = credentials('SEMGREP_APP_TOKEN')
-      SEMGREP_BASELINE_REF = "origin/main"
+      SEMGREP_BASELINE_REF = "origin/master"
       SEMGREP_BRANCH = "${BRANCH_NAME}"
       SEMGREP_COMMIT = "${GIT_COMMIT}"
       SEMGREP_REPO_URL = env.GIT_URL.replaceFirst(/^(.*).git$/,'$1')
@@ -23,7 +23,7 @@ pipeline {
       stage('Semgrep-Scan') {
         steps {
                 script {
-                    if (env.GIT_BRANCH == 'main') {
+                    if (env.GIT_BRANCH == 'master') {
                           sh '''docker pull returntocorp/semgrep && \
                             docker run \
                             -e SEMGREP_APP_TOKEN=$SEMGREP_APP_TOKEN \
