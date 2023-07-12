@@ -20,12 +20,12 @@ jobs:
         with:
           java-version: '11'
           distribution: 'temurin'
-      - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots package
+      #- name: Build with Maven
+      #  run: mvn --batch-mode --update-snapshots package
       - name: Build Dependency Tree
-        run: mvn dependency:tree -DoutputFile=maven_dep_tree.txt
+        run: mvn dependency:tree -DoutputFile=maven_dep_tree.txt -Dmaven.test.skip=true
       - name: Create Zip File
-        run: zip -r archive.zip maven_dep_tree.txt
+        run: find . -type f -name 'maven_dep_tree.txt' -exec zip -r archive.zip {} +
       - name: Upload Dependency Tree Artifact     
         uses: actions/upload-artifact@v3
         with:
@@ -55,5 +55,6 @@ jobs:
         with:
           name: zipfile      
       - run: |
+          unzip archive.zip
           ls -la
           semgrep ci
