@@ -7,6 +7,7 @@ on:
     paths:
     - .github/workflows/semgrep.yml
   schedule:
+  # random HH:MM to avoid a load spike on GitHub Actions at 00:00
   - cron: 00 5 1 * *
 name: Semgrep
 jobs:
@@ -23,6 +24,11 @@ jobs:
         run: mvn dependency:tree -DoutputFile=maven_dep_tree.txt -Dmaven.test.skip=true
       - name: Create Zip File
         run: find . -type f -name 'maven_dep_tree.txt' -exec zip -r archive.zip {} +
+      # - name: Upload Dependency Tree Artifact     
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: mavendeptree
+      #     path: maven_dep_tree.txt
       - name: Upload Dependency Zip    
         uses: actions/upload-artifact@v3
         with:
@@ -38,14 +44,15 @@ jobs:
       image: returntocorp/semgrep
     steps:
       - uses: actions/checkout@v3
+      # - name: Download artifact from previous job 1
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: mavendeptree
       - name: Download artifact from previous job 2
         uses: actions/download-artifact@v3
         with:
-          name: zipfile
-
-      - name: Unzip maven dep tree
-      - run: unzip -o archive.zip
-
-      - name: Semgrep scan
-      - run: semgrep ci
-          
+          name: zipfile    
+      - name: Semgrep Scan  
+        run: |
+          unzip -o archive.zip
+          semgrep ci
