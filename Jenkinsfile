@@ -4,13 +4,23 @@ pipeline {
       // The following variable is required for a Semgrep Cloud Platform-connected scan:
       SEMGREP_APP_TOKEN = credentials('SEMGREP_APP_TOKEN')
       SEMGREP_BASELINE_REF = "origin/master"
-      SEMGREP_BRANCH = "${BRANCH_NAME}"
+      //SEMGREP_BRANCH = "${BRANCH_NAME}"
+      SEMGREP_BRANCH="${GIT_BRANCH}"
       SEMGREP_COMMIT = "${GIT_COMMIT}"
       SEMGREP_REPO_URL = env.GIT_URL.replaceFirst(/^(.*).git$/,'$1')
       SEMGREP_PR_ID = "${env.CHANGE_ID}"
     }
     stages {
-
+      stage('Get Branch Name') {
+        steps {
+          script {
+            def branchName = sh(returnStdout: true, script: 'git rev-parse --abbrev-ref HEAD').trim()
+            echo "Current branch name with script: ${branchName}"
+            echo "GIT_BRANCH envvar: ${env.GIT_BRANCH}"
+            echo "SEMGREP_BRANCH: ${SEMGREP_BRANCH}"
+          }
+        }
+      }
       stage ('Generate-LockFile') {
         steps {
             withMaven(maven: 'maven') {
