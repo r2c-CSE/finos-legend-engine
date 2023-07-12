@@ -3,7 +3,6 @@ on:
   pull_request: {}
   push:
     branches:
-    - main
     - master
     paths:
     - .github/workflows/semgrep.yml
@@ -16,20 +15,27 @@ jobs:
       runs-on: ubuntu-latest
       steps:
       - uses: actions/checkout@v3
-      - name: Set up JDK 17
+      - name: Set up JDK 11
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: '11'
           distribution: 'temurin'
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots package
       - name: Build Dependency Tree
         run: mvn dependency:tree -DoutputFile=maven_dep_tree.txt
+      - name: Create Zip File
+        run: zip -r archive.zip maven_dep_tree.txt
       - name: Upload Dependency Tree Artifact     
         uses: actions/upload-artifact@v3
         with:
           name: mavendeptree
           path: maven_dep_tree.txt
+      - name: Upload Dependency Zip    
+        uses: actions/upload-artifact@v3
+        with:
+          name: zipfile
+          path: archive.zip
   semgrep:
     needs: buildmavenDepTree
     name: Scan
@@ -40,8 +46,14 @@ jobs:
       image: returntocorp/semgrep
     steps:
       - uses: actions/checkout@v3
-      - name: Download artifact from previous job
+      - name: Download artifact from previous job 1
         uses: actions/download-artifact@v3
         with:
           name: mavendeptree
-      - run: semgrep ci
+      - name: Download artifact from previous job 2
+        uses: actions/download-artifact@v3
+        with:
+          name: zipfile      
+      - run: |
+          ls -la
+          semgrep ci
