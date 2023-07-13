@@ -33,11 +33,17 @@ pipeline {
         steps {
                 script {
                     if (env.GIT_BRANCH == 'master') {
-                          sh '''docker pull returntocorp/semgrep && \
-                            docker run \
-                            -e SEMGREP_APP_TOKEN=$SEMGREP_APP_TOKEN \
-                            -v "$(pwd):$(pwd)" --workdir $(pwd) \
-                            returntocorp/semgrep semgrep ci '''
+                        sh '''docker pull returntocorp/semgrep && \
+                                  docker run \
+                                  -e SEMGREP_APP_TOKEN=$SEMGREP_APP_TOKEN \
+                                  -e SEMGREP_BASELINE_REF=$SEMGREP_BASELINE_REF \
+                                  -e SEMGREP_REPO_URL=$SEMGREP_REPO_URL \
+                                  -e SEMGREP_BRANCH=$SEMGREP_BRANCH \
+                                  -e SEMGREP_JOB_URL=$SEMGREP_JOB_URL \
+                                  -e SEMGREP_COMMIT=$SEMGREP_COMMIT \
+                                  -e SEMGREP_PR_ID=$SEMGREP_PR_ID \
+                                  -v "$(pwd):$(pwd)" --workdir $(pwd) \
+                                  returntocorp/semgrep semgrep ci'''
                     }  else {
                         sh "git fetch origin +ref/heads/*:refs/remotes/origin/*" 
                         sh '''docker pull returntocorp/semgrep && \
